@@ -1,5 +1,5 @@
 <div *ngIf="isLoading">
-  <app-page-loading-spinner></app-page-loading-spinner>
+  <!-- <app-page-loading-spinner></app-page-loading-spinner> -->
 </div>
 
 <div class="container">
@@ -18,7 +18,7 @@
         </div>
         <div class="col-lg-6 col-md-12">
           <h2 class="product-title text-capitalize">{{ product.name }}</h2>
-          <div class="d-flex review-container">
+          <!-- <div class="d-flex review-container">
             <div class="star-ratings-css">
               <div class="star-ratings-css-top" [ngStyle]="{'width': (product.averageRating * 20) + '%'}">
                 <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
@@ -27,8 +27,8 @@
               </div>
             </div>
             <p class="review-count m-0 ml-2">{{ product.noOfRatings }} Reviews</p>
-          </div>
-          <h4 class="product-price">₱{{ product.price }}</h4>
+          </div> -->
+          <h4 class="product-price">Rs. {{ product.price }}</h4>
 
           <div class="row mb-3">
             <div class="col-4 test1">

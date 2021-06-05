@@ -46,6 +46,30 @@ import { OrdersComponent } from './account/account-home/orders/orders.component'
 import { ProfileComponent } from './account/account-home/profile/profile.component';
 import { ChangePasswordComponent } from './account/account-home/change-password/change-password.component';
 import { NotFoundComponent } from './not-found/not-found.component';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+
+var env = {
+  production: false,
+  firebaseConfig: {
+  apiKey: "AIzaSyAU2Ws5SO_D9cvgDZLR1nld3Mb7ar7_Js0",
+  authDomain: "e-commerce-d58f8.firebaseapp.com",
+  projectId: "e-commerce-d58f8",
+  storageBucket: "e-commerce-d58f8.appspot.com",
+  messagingSenderId: "570700087174",
+  appId: "1:570700087174:web:ad08731ffa40c3ee627607",
+  measurementId: "G-1V7NQ6P291"
+  },
+};
+var firebaseConfig : {
+  apiKey: "AIzaSyAU2Ws5SO_D9cvgDZLR1nld3Mb7ar7_Js0",
+  authDomain: "e-commerce-d58f8.firebaseapp.com",
+  projectId: "e-commerce-d58f8",
+  storageBucket: "e-commerce-d58f8.appspot.com",
+  messagingSenderId: "570700087174",
+  appId: "1:570700087174:web:ad08731ffa40c3ee627607",
+  measurementId: "G-1V7NQ6P291"
+}
 
 @NgModule({
   declarations: [
@@ -97,7 +121,9 @@ import { NotFoundComponent } from './not-found/not-found.component';
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    AngularFireModule.initializeApp(env.firebaseConfig),
+    AngularFirestoreModule, // for firestore
   ],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true}],
   bootstrap: [AppComponent]

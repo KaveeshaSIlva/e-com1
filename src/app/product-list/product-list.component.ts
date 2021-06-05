@@ -75,6 +75,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // this.productsService.getProductss();
     this.activeOrder = this.route.snapshot.queryParamMap["params"].order
       ? this.route.snapshot.queryParamMap["params"].order
       : this.activeOrder;

@@ -12,6 +12,8 @@ import { PagerService } from '../shared/pager.service';
 import { CartService } from '../cart/cart.service';
 import { AuthService } from '../account/auth.service';
 
+import { Product } from "../shared/models";
+import { ProductService } from "../services/product-service/product.service";
 @Component({
   selector: "app-single-product",
   templateUrl: "./single-product.component.html",
@@ -25,7 +27,7 @@ export class SingleProductComponent implements OnInit, OnDestroy {
   productPhotosReceivedSubscription: Subscription;
   productReviewsReceivedSubscription: Subscription;
 
-  product: SingleProduct = new SingleProduct(0, ' ', 0, ' ', ' ', ' ', 0, 0, '', '');
+  // product: SingleProduct = new SingleProduct('0', ' ', 0, ' ', ' ', ' ', 0, 0, '', '');
   imgUrls = [];
 
   reviews: Review[] = [];
@@ -39,10 +41,11 @@ export class SingleProductComponent implements OnInit, OnDestroy {
   isLoading = true;
   isAddToCartLoading = false;
   cartServiceSubscription: Subscription;
-
+  product: Product
   constructor(
     private route: ActivatedRoute,
     private productService: ProductsService,
+    private ps: ProductService,
     private pagerService: PagerService,
     private router: Router,
     private cartService: CartService,
@@ -50,7 +53,10 @@ export class SingleProductComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-
+    this.ps.getProductById("behO8OxKp3o8BbGlWtP3").subscribe((data)=>{
+      console.log(data)
+      this.product = data
+    })
     if (this.route.snapshot.queryParamMap['params'].order) {
       this.activeOrder = this.route.snapshot.queryParamMap['params'].order;
     }
@@ -78,11 +84,11 @@ export class SingleProductComponent implements OnInit, OnDestroy {
       this.reviewsLoading = false;
     });
 
-    this.productReceivedSubscription = this.productService.productReceived.subscribe(product => {
-      this.product = product;
-      if (!this.product.averageRating) { this.product.averageRating = 0; }
-      this.isLoading = false;
-    });
+    // this.productReceivedSubscription = this.productService.productReceived.subscribe(product => {
+    //   this.product = product;
+    //   if (!this.product.averageRating) { this.product.averageRating = 0; }
+    //   this.isLoading = false;
+    // });
 
     this.productPhotosReceivedSubscription = this.productService.productPhotosReceived.subscribe(imgUrls => {
       this.imgUrls = imgUrls;

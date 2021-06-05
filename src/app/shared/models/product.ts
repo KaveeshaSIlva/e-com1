@@ -1,0 +1,13 @@
+export interface Product{
+    id: string,
+    name: string,
+    price: number,
+    productDesc1: string,
+    productDesc2: string,
+    productDesc3: string,
+    averageRating: number,
+    noOfRatings: number,
+    category: string,
+    subcategory: string,
+    photos: string[],
+  }
