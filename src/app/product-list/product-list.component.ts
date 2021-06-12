@@ -16,6 +16,10 @@ import { AuthService } from "../account/auth.service";
 import { CartService } from "../cart/cart.service";
 import { FilterByService } from "./filter-by/filter-by.service";
 
+import { Product, FilterQuery } from "../shared/models";
+import { ProductService } from "../services/product-service/product.service";
+import firebase from 'firebase/app';
+
 @Component({
   selector: "app-category-page",
   templateUrl: "./product-list.component.html",
@@ -26,7 +30,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   categories: Category[] = [];
   activeSort = "noOfRatings";
   activeOrder = "DESC";
-
+  paramQuery: firebase.firestore.DocumentData;
   // ui state vars
   isMobileSortByToggled = false;
   isMobileFilterByToggled = false;
@@ -41,9 +45,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   filterByMobileServiceSubscription: Subscription;
 
   // pagination vars
-  products: ProductListItem[] = [];
+  // products: ProductListItem[] = [];
   pager: any = {};
-  pagedProducts: any[]; // paged items
+  // pagedProducts: any[]; // paged items
 
   latestQueryParams;
 
@@ -59,6 +63,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   getByCategoryMode: boolean;
 
   searchValue;
+  pagedProducts: Product[];
 
   constructor(
     private route: ActivatedRoute,
@@ -71,11 +76,36 @@ export class ProductListComponent implements OnInit, OnDestroy {
     private location: Location,
     private authService: AuthService,
     private cartService: CartService,
-    private filterByService: FilterByService
+    private filterByService: FilterByService,
+    private ps: ProductService
   ) {}
-
+  
+  sttt(){
+    let qparams =this.route.snapshot.queryParamMap["params"] as FilterQuery;
+    // console.log(qparams)
+    
+    this.ps.getProducts(qparams).then((categoryDoc)=>{
+      let prod = categoryDoc.map((p)=>{
+        return p.data()
+      })
+      this.pagedProducts =prod
+      this.isLoading =false
+    })
+  }
   ngOnInit() {
-    // this.productsService.getProductss();
+    // this.ps.getProducts().subscribe((data)=>{
+    //   this.pagedProducts =data
+    //   this.isLoading =false
+    // })
+    // let qparams =this.route.snapshot.queryParamMap["params"] as FilterQuery;
+    // this.ps.getProducts(qparams).then((categoryDoc)=>{
+    //   let prod = categoryDoc.map((p)=>{
+    //     return p.data()
+    //   })
+    //   this.pagedProducts =prod
+    //   this.isLoading =false
+    // })
+    this.sttt();
     this.activeOrder = this.route.snapshot.queryParamMap["params"].order
       ? this.route.snapshot.queryParamMap["params"].order
       : this.activeOrder;
@@ -118,7 +148,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
         );
         this.setPage(1);
       } else {
-        this.productsService.getProducts(this.route.snapshot.queryParamMap["params"]);
+        // this.productsService.getProducts(this.route.snapshot.queryParamMap["params"]);
         this.setPage(1);
       }
     });
@@ -135,7 +165,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
         this.setPage(1);
       } else {
         this.searchValue = queryParams.q;
-        this.productsService.getProducts(queryParams);
+        // this.productsService.getProducts(queryParams);
         this.setPage(1);
       }
     });
@@ -160,7 +190,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
     this.productsUpdatedSubscription = this.productsService.productsUpdated.subscribe(
       products => {
-        this.products = products;
+        // this.products = products;
         this.setPage(1);
         this.isLoading = false;
       }
@@ -231,12 +261,15 @@ export class ProductListComponent implements OnInit, OnDestroy {
         sortBy: by
       },
       queryParamsHandling: "merge"
+    }).then(()=>{
+      this.activeSort = by;
+      this.sttt()
     });
-
-    this.activeSort = by;
   }
 
   onSelectOrder(selectedOrder: string) {
+    // alert('jjjj')
+    this.pagedProducts=[]
     if (this.latestQueryParams.order !== selectedOrder) {
       this.isLoading = true;
     }
@@ -248,9 +281,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
         order: selectedOrder
       },
       queryParamsHandling: "merge"
+    }).then(()=>{
+
+      this.activeOrder = selectedOrder;
+      this.sttt();
     });
 
-    this.activeOrder = selectedOrder;
   }
 
   onToggleSortByMobile() {
@@ -269,11 +305,11 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   setPage(page: number) {
     this.scrollToTop();
-    this.pager = this.pagerService.getPager(this.products.length, page, 8);
-    this.pagedProducts = this.products.slice(
-      this.pager.startIndex,
-      this.pager.endIndex + 1
-    );
+    // this.pager = this.pagerService.getPager(this.products.length, page, 8);
+    // this.pagedProducts = this.products.slice(
+    //   this.pager.startIndex,
+    //   this.pager.endIndex + 1
+    // );
   }
 }
 

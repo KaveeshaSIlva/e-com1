@@ -171,7 +171,7 @@
                                 <app-product-image [imgSrc]="product.imgUrl" [routerLink]="['/products/' + product.id]"
                                     (click)="scrollToTop()"></app-product-image>
                                 <!-- <img [hidden]="loading" (load)="onLoad()" src="{{ product.imageUrl }}" alt="" class="product-img mb-3"> -->
-                            </div>
+                            </div> 
                             <p class="product-name">
                                 {{ (product.name.length > 12) ? (product.name | slice:0:12) + '...' : product.name }}
                             </p>

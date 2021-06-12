@@ -26,29 +26,40 @@ export class CategoriesComponent implements OnInit {
   }
 
   navigateToAll() {
-    this.router.navigate(["/products"], {
-      queryParams: {
-        q: null,
-        subcategories: null,
-        redirectUrl: null,
-        order: this.route.snapshot.queryParamMap["params"].order,
-        sortBy: this.route.snapshot.queryParamMap["params"].sortBy
-      },
-      queryParamsHandling: "merge"
-    });
+    window.location.href = `products`;
+    this.router.navigate(["/products"]
+    // , {
+    //   queryParams: {
+    //     order: this.route.snapshot.queryParamMap["params"].order,
+    //     sortBy: this.route.snapshot.queryParamMap["params"].sortBy
+    //   },
+    //   queryParamsHandling: "preserve"
+    // }
+    );
   }
 
   navigateToCategory(category) {
-    this.router.navigate(["/products/category/" + category], {
-      queryParams: {
-        q: null,
-        subcategories: null,
-        redirectUrl: null,
-        order: this.route.snapshot.queryParamMap["params"].order,
-        sortBy: this.route.snapshot.queryParamMap["params"].sortBy
-      },
-      queryParamsHandling: "merge"
-    });
+    window.location.href = `products?category=${category}`;
+    // this.router.navigate([], {
+    //   queryParams: {
+    //     sortBy: by
+    //   },
+    //   queryParamsHandling: "merge"
+    // });
+    this.router.navigate(['/products'],{queryParams:{category:category},
+        queryParamsHandling: "merge"}
+    )
+    // ///////////////
+    // this.router.navigate(["/products/category/" + category], {
+    //   queryParams: {
+    //     q: null,
+    //     subcategories: null,
+    //     redirectUrl: null,
+    //     order: this.route.snapshot.queryParamMap["params"].order,
+    //     sortBy: this.route.snapshot.queryParamMap["params"].sortBy
+    //   },
+    //   queryParamsHandling: "merge"
+    // });
   }
 
   navigateToSubcategory(category, subcategory) {

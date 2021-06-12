@@ -4,6 +4,7 @@ import { CartService } from "src/app/cart/cart.service";
 import { AuthService } from "src/app/account/auth.service";
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from  '@angular/forms';
 
 @Component({
   selector: "app-main",
@@ -15,15 +16,20 @@ export class MainComponent implements OnInit, OnDestroy {
   scaled: boolean;
   cartTotal;
   cartServiceSubscription: Subscription;
+  searchForm:FormGroup;
 
   constructor(
     private cartUiService: CartUiService,
     private cartService: CartService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private fb:FormBuilder,
   ) {}
 
   ngOnInit() {
+    this.searchForm=this.fb.group({
+      keyword: ""
+    });
     this.cartServiceSubscription = this.cartService.cartUpdated.subscribe(cartItems => {
       this.scaled = true;
 
@@ -49,7 +55,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   onSearch(value) {
-    this.router.navigate(['/search'], {
+    this.router.navigate(['/searchm'], {
       queryParams: {
         q: value
       }
@@ -62,5 +68,21 @@ export class MainComponent implements OnInit, OnDestroy {
 
   onToggleCart() {
     this.cartUiService.toggleCart();
+  }
+
+  search(){
+    // this.router.navigateByUrl('/search', {keywords:"s"} );
+    let keyword =this.searchForm.controls.keyword.value;
+    this.searchForm.reset();
+    window.location.href = `products?keyword=${keyword}`;
+    // this.router.navigate([], {
+    //   queryParams: {
+    //     sortBy: by
+    //   },
+    //   queryParamsHandling: "merge"
+    // });
+    this.router.navigate(['/products'],{queryParams:{keyword:this.searchForm.controls.keyword.value},
+        queryParamsHandling: "merge"}
+    )
   }
 }

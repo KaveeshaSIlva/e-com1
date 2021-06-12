@@ -5,7 +5,7 @@ import {
 } from '@angular/fire/firestore';
 import {from, Observable} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
-import {MODELTYPE} from '../../shared/models';
+import {FilterQuery, MODELTYPE} from '../../shared/models';
 import {Product} from '../../shared/models';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
@@ -18,22 +18,111 @@ export class ProductService {
   products: Observable<Product[]>;
   constructor(private firestore: AngularFirestore) {}
   db = firebase.firestore();
-  getProducts(): Observable<Product[]> {
-    this.productCollection = this.firestore.collection<Product>(
-      MODELTYPE.PRODUCTS,
-    );
-    this.products = this.productCollection.snapshotChanges().pipe(
-      map((actions) =>
-        actions.map((a) => {
-          const data = a.payload.doc.data() as Product;
-          data.id = a.payload.doc.id;
-          // data.date = new Date(parseInt(data.date)).toDateString();
-          return data;
-        }),
-      ),
-    );
-    return this.products;
+  paramQuery:firebase.firestore.DocumentData = this.db.collection(MODELTYPE.PRODUCTS);
+  // getProducts(): Observable<Product[]> {
+  //   this.productCollection = this.firestore.collection<Product>(
+  //     MODELTYPE.PRODUCTS,
+  //   );
+  //   this.products = this.productCollection.snapshotChanges().pipe(
+  //     map((actions) =>
+  //       actions.map((a) => {
+  //         const data = a.payload.doc.data() as Product;
+  //         data.id = a.payload.doc.id;
+  //         // data.date = new Date(parseInt(data.date)).toDateString();
+  //         return data;
+  //       }),
+  //     ),
+  //   );
+  //   return this.products;
+  // }
+
+  updateFilterQuery(listDocRef: firebase.firestore.DocumentData,field: string,value:any, operator: string="=="): firebase.firestore.DocumentData 
+  {
+    return listDocRef.where(field,operator,value);
   }
+
+  updateSortQuery(listDocRef: firebase.firestore.DocumentData,field: string,order:string): firebase.firestore.DocumentData 
+  {
+    if(order!=undefined && order=="DESC"){
+      return listDocRef.orderBy(field,'desc');
+    } else {
+      return listDocRef.orderBy(field)
+    }
+  }
+
+  async getProducts(qparams: FilterQuery){
+    this.paramQuery = this.db.collection(MODELTYPE.PRODUCTS);
+    if(qparams.keyword!= undefined){
+      this.paramQuery = this.updateFilterQuery(this.paramQuery,'name',qparams.keyword);
+    }
+    if(qparams.category!= undefined){
+      this.paramQuery = this.updateFilterQuery(this.paramQuery,'category',qparams.category);
+    }
+    if(qparams.subcategory!= undefined){
+      this.paramQuery = this.updateFilterQuery(this.paramQuery,'subcategory',qparams.subcategory);
+    }
+    if(qparams.sortBy!= undefined){
+      this.paramQuery = this.updateSortQuery(this.paramQuery, qparams.sortBy, qparams.order? qparams.order:"DESC");
+    } else{
+      this.paramQuery = this.updateSortQuery(this.paramQuery, 'noOfRatings', 'DESC');
+    }
+    // let x =this.paramQuery.query()
+    // console.log(this.paramQuery)
+    // if(qparams.category!= undefined){
+    //   this.paramQuery = this.updateFilterQuery(this.paramQuery,'category',qparams.category);
+    // }
+    // let listDocRef = this.db.collection(MODELTYPE.PRODUCTS).where('name','==',name);
+    let s = await this.paramQuery.get().then((querySnapshot)=>{
+      let w = querySnapshot.docs.map(function(doc) {
+        return doc;
+      });
+      return w ;
+    })
+    return s;
+  }
+
+  async getCategoryByName(name:string){
+    let listDocRef = this.db.collection(MODELTYPE.PRODUCTS).where('name','==',name);
+    let s = await listDocRef.get().then((querySnapshot)=>{
+      let w = querySnapshot.docs.map(function(doc) {
+        return doc;
+      });
+      return w ;
+    })
+    return s;
+  }
+
+  // getProductssss(): Product[] {
+  //   this.db.collection(MODELTYPE.PRODUCTS).where("name", "==", "Lettuce")
+  //     .onSnapshot((querySnapshot) => {
+  //         // var cities = [];
+  //         // querySnapshot.forEach((doc) => {
+  //         //     const data = doc.data() as Product;
+  //         //     cities.push(data);
+  //         // });
+  //         let w = querySnapshot.docs.map(function(doc) {
+  //           const data = doc.data() as Product;
+  //           return data;
+  //         });
+  //         return w[0];
+  //         // return cities;
+  //     });
+  //   // this.productCollection = this.firestore.collection<Product>(
+  //   //   MODELTYPE.PRODUCTS,
+  //   // );
+  //   // this.products = this.productCollection.get({name: "Lettuce"}).pipe(
+  //   //   map((actions) =>
+  //   //     actions.map((a) => {
+  //   //       const data = a.payload.doc.data() as Product;
+  //   //       data.id = a.payload.doc.id;
+  //   //       // data.date = new Date(parseInt(data.date)).toDateString();
+  //   //       return data;
+  //   //     }),
+  //   //   ),
+  //   // );
+  //   // return this.products;
+  // }
+  
   // getProductsByIds(){
   // this.db.collection(MODELTYPE.PRODUCTS).where("name", "in", ['Pen','Pencil'])
   //   .get()

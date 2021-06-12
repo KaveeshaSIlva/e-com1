@@ -18,3 +18,11 @@ export interface Product{
   subcategory: string,
   photos: string[],
 }
+
+export interface FilterQuery{
+  sortBy: string;
+  order: string;
+  category: string;
+  subcategory: string;
+  keyword: string;
+}
