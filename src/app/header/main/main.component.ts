@@ -82,7 +82,7 @@ export class MainComponent implements OnInit, OnDestroy {
     //   queryParamsHandling: "merge"
     // });
     this.router.navigate(['/products'],{queryParams:{keyword:this.searchForm.controls.keyword.value},
-        queryParamsHandling: "merge"}
+        queryParamsHandling: "preserve"}
     )
   }
 }

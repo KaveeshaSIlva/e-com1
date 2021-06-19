@@ -19,6 +19,8 @@ import { FilterByService } from "./filter-by/filter-by.service";
 import { Product, FilterQuery } from "../shared/models";
 import { ProductService } from "../services/product-service/product.service";
 import firebase from 'firebase/app';
+import { subscribeOn } from "rxjs/operators";
+import { EnumType } from "typescript";
 
 @Component({
   selector: "app-category-page",
@@ -26,6 +28,7 @@ import firebase from 'firebase/app';
   styleUrls: ["./product-list.component.css"]
 })
 export class ProductListComponent implements OnInit, OnDestroy {
+  selectedCategory:{name: string, subcetegories: {name: string}[]}={name:"",subcetegories:[]}
   address: string;
   categories: Category[] = [];
   activeSort = "noOfRatings";
@@ -61,7 +64,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   allProductsMode: boolean;
   searchMode: boolean;
   getByCategoryMode: boolean;
-
+  getBySubCategoryMode: boolean;
   searchValue;
   pagedProducts: Product[];
 
@@ -83,7 +86,14 @@ export class ProductListComponent implements OnInit, OnDestroy {
   sttt(){
     let qparams =this.route.snapshot.queryParamMap["params"] as FilterQuery;
     // console.log(qparams)
-    
+    if(qparams.category!=undefined){
+      this.activateMode('category')
+      this.selectedCategory = {name: qparams.category,subcetegories:[]}
+    }
+    if(qparams.keyword !=undefined){
+      this.activateMode('search')
+      this.searchValue = qparams.keyword
+    }
     this.ps.getProducts(qparams).then((categoryDoc)=>{
       let prod = categoryDoc.map((p)=>{
         return p.data()
@@ -92,7 +102,22 @@ export class ProductListComponent implements OnInit, OnDestroy {
       this.isLoading =false
     })
   }
+
+  getProductsByOrder(filterQuery: FilterQuery){
+    this.ps.getProducts(filterQuery).then((categoryDoc)=>{
+      let prod = categoryDoc.map((p)=>{
+        return p.data()
+      })
+      this.pagedProducts =prod
+      this.isLoading =false
+    })
+  }
+
   ngOnInit() {
+    this.searchMode =false;
+    this.getByCategoryMode =false;
+    this.getBySubCategoryMode =false;
+    this.allProductsMode =true;
     // this.ps.getProducts().subscribe((data)=>{
     //   this.pagedProducts =data
     //   this.isLoading =false
@@ -106,69 +131,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
     //   this.isLoading =false
     // })
     this.sttt();
-    this.activeOrder = this.route.snapshot.queryParamMap["params"].order
-      ? this.route.snapshot.queryParamMap["params"].order
-      : this.activeOrder;
-    this.activeSort = this.route.snapshot.queryParamMap["params"].sortBy
-      ? this.route.snapshot.queryParamMap["params"].sortBy
-      : this.activeSort;
-
-    if (this.route.snapshot.paramMap["params"].category) {
-      this.getByCategoryMode = true;
-      this.allProductsMode = false;
-      this.categoryService.getValidCategories().subscribe(res => {
-        // redirect if category doesn't exist
-        res.result.forEach(obj => {
-          if (
-            obj.category === this.route.snapshot.paramMap["params"].category
-          ) {
-            this.isCategoryValid = true;
-          }
-        });
-
-        if (!this.isCategoryValid) {
-          this.router.navigate(["/products"]);
-        }
-      });
-    } else if ((this.router.url.includes("?") ? this.router.url.substring(0, this.router.url.indexOf("?")) : this.router.url) === "/products") {
-      this.allProductsMode = true;
-    } else {
-      this.searchMode = true;
-    }
-
-    this.route.params.subscribe(params => {
-      this.isLoading = true;
-
-      if (this.getByCategoryMode) {
-        this.address = params.category;
-
-        this.productsService.getProductsByCategory(
-          params,
-          this.route.snapshot.queryParamMap["params"]
-        );
-        this.setPage(1);
-      } else {
-        // this.productsService.getProducts(this.route.snapshot.queryParamMap["params"]);
-        this.setPage(1);
-      }
-    });
-
-    this.route.queryParams.subscribe(queryParams => {
-      this.isLoading = true;
-      this.latestQueryParams = queryParams;
-
-      if (this.getByCategoryMode) {
-        this.productsService.getProductsByCategory(
-          this.route.snapshot.paramMap["params"],
-          queryParams
-        );
-        this.setPage(1);
-      } else {
-        this.searchValue = queryParams.q;
-        // this.productsService.getProducts(queryParams);
-        this.setPage(1);
-      }
-    });
 
     this.categoryService.categoriesFetched.subscribe(res => {
       this.categories = res;
@@ -208,6 +170,41 @@ export class ProductListComponent implements OnInit, OnDestroy {
         this.isMobileFilterByToggled = f;
       }
     );
+  }
+
+  activateMode(mode:'search'| 'category'|'subcategory'|'all'){
+    this.searchMode =false;
+    this.getByCategoryMode =false;
+    this.getBySubCategoryMode =false;
+    this.allProductsMode =false;
+      if(mode =='all'){
+        this.allProductsMode =true;
+      }
+      if(mode =='search'){
+        this.searchMode =true;
+      }
+      if(mode =='category'){
+        this.getByCategoryMode =true;
+      }
+      if(mode =='subcategory'){
+        this.getBySubCategoryMode =true;
+      }
+  }
+
+  selectedcategoryChanged(selectedCategory:{name: string, subcetegories: {name: string}[]}){
+    this.selectedCategory=selectedCategory
+    if(selectedCategory.subcetegories.length>0){
+      this.activateMode('subcategory')
+    } else{
+      this.activateMode('category')
+    }
+    this.ps.getProductsByCatBrowsing(selectedCategory).then((categoryDoc)=>{
+      let prod = categoryDoc.map((p)=>{
+        return p.data()
+      })
+      this.pagedProducts =prod
+      this.isLoading =false
+    })
   }
 
   ngOnDestroy() {
@@ -250,9 +247,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   onSortProducts(by: string) {
-    if (this.latestQueryParams.sortBy !== by) {
-      this.isLoading = true;
-    }
+    // if (this.latestQueryParams.sortBy !== by) {
+    //   this.isLoading = true;
+    // }
 
     this.onToggleSortByMobile();
 
@@ -268,24 +265,29 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   onSelectOrder(selectedOrder: string) {
-    // alert('jjjj')
-    this.pagedProducts=[]
-    if (this.latestQueryParams.order !== selectedOrder) {
-      this.isLoading = true;
-    }
+    // this.pagedProducts=[]
+    // if (this.latestQueryParams.order !== selectedOrder) {
+    //   this.isLoading = true;
+    // }
 
     this.onToggleSortByMobile();
-
-    this.router.navigate([], {
-      queryParams: {
-        order: selectedOrder
-      },
-      queryParamsHandling: "merge"
-    }).then(()=>{
+    if(this.getByCategoryMode){
+      this.getProductsByOrder({sortBy:undefined,keyword:undefined,category:this.selectedCategory.name,subcategory:undefined,order:selectedOrder})
+    }
+    if(this.searchMode){
+      this.getProductsByOrder({sortBy:undefined,keyword:this.searchValue,category:undefined,subcategory:undefined,order:selectedOrder})
+    }
+    
+    // this.router.navigate([], {
+    //   queryParams: {
+    //     order: selectedOrder
+    //   },
+    //   queryParamsHandling: "merge"
+    // }).then(()=>{
 
       this.activeOrder = selectedOrder;
-      this.sttt();
-    });
+    //   this.sttt();
+    // });
 
   }
 

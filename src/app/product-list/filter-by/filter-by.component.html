@@ -1,6 +1,47 @@
     <div style="min-height: 600px;">
         <h5 class="mb-3 filter-text">Filter page by: </h5>
-
+        <div class="accordion mb-5" id="accordionExample">
+            <div class="card" data-toggle="collapse"  *ngFor="let category of categories" [attr.data-target]="'#'+category.name" aria-expanded="false"
+                aria-controls="collapseThreee">
+                <!-- <div class="card-header" id="headingThree"> -->
+                <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                    <button class="btn" style="border: none; outline: none;" type="button" (click)="changeCategory(category.name)">
+                        {{category.name}}
+                    </button>
+                    <svg class="iconify mr-2 acc-arrow" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1em"
+                    height="1em"
+                    style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);"
+                    preserveAspectRatio="xMidYMid meet" viewBox="0 0 20 20" _ngcontent-ixb-c1=""
+                    data-icon="dashicons-arrow-right-alt2" data-inline="false">
+                    <path d="M6 15l5-5l-5-5l1-2l7 7l-7 7z" fill="currentColor"></path>
+                    </svg>
+                </h5>
+                <!-- </div> -->
+                <div id="{{category.name}}" class="collapse" data-parent="#accordionExample">
+                    <div *ngIf="category.subcategories.length !== 0" style="margin-left: 10px;">
+                        <div class="form-check">
+                            <div *ngFor="let subcategory of category.subcategories" class="text-capitalize filter-text">
+                                <!-- <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="{{ subcategory.subCategory }}"
+                                    id="defaultCheck1"
+                                    (change)="onToggleSubcategory(subcategory.subCategory)"
+                                    [checked]="isSubcategoryActive(subcategory.subCategory)"
+                                > -->
+                                <!-- <label class="form-check-label" for="{{ subcategory.subCategory }}">
+                                {{ subcategory.subCategory}} ({{ subcategory.count }})
+                                </label> -->
+                                <button (click)="changeSubCategory(category.name, subcategory.name)" class="btn" style="background-color: white;border: none; outline: none;" type="button" class="form-check-label">
+                                    {{ subcategory.name}} ({{ subcategory.count }})
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div *ngIf="subcategories.length !== 0">
             <div class="separator my-3"></div>
             <h6 class="filter-text">Subcategories</h6>

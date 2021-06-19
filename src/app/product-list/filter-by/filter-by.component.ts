@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener } from "@angular/core";
+import { Component, OnInit, OnDestroy, HostListener, Input, Output, EventEmitter } from "@angular/core";
 import { FilterByService } from "./filter-by.service";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
@@ -10,12 +10,15 @@ import { ProductsService } from '../products.service';
   styleUrls: ["./filter-by.component.css"]
 })
 export class FilterByComponent implements OnInit {
+  @Output() selectedcategoryChanged: EventEmitter<{name: string, subcetegories: {name: string}[]}> = new EventEmitter();
   subcategories = [];
   producers = [];
   activeFilters = [];
   activeSubcategories = [];
   queryParamsSubscriptions: Subscription;
-
+  selectedCategory:{name: string, subcetegories: {name: string}[]}
+  categories=[{name:'vegetable',subcategories:[{name:'lettuce',count:2},{name:'sub 2',count:2}]},{name:'electronics',subcategories:[{name:'sub 1',count:2},{name:'sub 2',count:2}]}]
+  // categories=[{name:'vegetable',subcategories:[{name:'sub 1',count:2},{name:'sub 2',count:2}]}]
   constructor(
     private filterByService: FilterByService,
     private route: ActivatedRoute,
@@ -36,6 +39,18 @@ export class FilterByComponent implements OnInit {
     this.route.queryParams.subscribe(res => {
       this.initializeCheckboxes();
     });
+  }
+
+  changeCategory(category: string){
+    this.selectedCategory = {name: category, subcetegories:[]}
+    // alert(category)
+    this.selectedcategoryChanged.emit(this.selectedCategory);
+  }
+
+  changeSubCategory(category: string, subcategory:string){
+    this.selectedCategory = {name: category, subcetegories:[{name:subcategory}]} 
+    // alert(subcategory)
+    this.selectedcategoryChanged.emit(this.selectedCategory);
   }
 
   initializeCheckboxes() {

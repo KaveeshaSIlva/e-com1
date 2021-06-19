@@ -53,7 +53,8 @@ export class ProductService {
   async getProducts(qparams: FilterQuery){
     this.paramQuery = this.db.collection(MODELTYPE.PRODUCTS);
     if(qparams.keyword!= undefined){
-      this.paramQuery = this.updateFilterQuery(this.paramQuery,'name',qparams.keyword);
+      this.paramQuery = this.updateFilterQuery(this.paramQuery,'name',qparams.keyword,">=");
+      this.paramQuery = this.updateFilterQuery(this.paramQuery,'name',qparams.keyword + '\uf8ff',"<=");
     }
     if(qparams.category!= undefined){
       this.paramQuery = this.updateFilterQuery(this.paramQuery,'category',qparams.category);
@@ -64,7 +65,9 @@ export class ProductService {
     if(qparams.sortBy!= undefined){
       this.paramQuery = this.updateSortQuery(this.paramQuery, qparams.sortBy, qparams.order? qparams.order:"DESC");
     } else{
-      this.paramQuery = this.updateSortQuery(this.paramQuery, 'noOfRatings', 'DESC');
+      this.paramQuery = this.updateSortQuery(this.paramQuery, 'name', qparams.order!= undefined?qparams.order: 'ASC');
+      this.paramQuery = this.updateSortQuery(this.paramQuery, 'price', qparams.order!= undefined?qparams.order: 'DESC');
+      // this.paramQuery = this.updateSortQuery(this.paramQuery, 'noOfRatings', 'DESC');
     }
     // let x =this.paramQuery.query()
     // console.log(this.paramQuery)
@@ -79,6 +82,28 @@ export class ProductService {
       return w ;
     })
     return s;
+  }
+
+  async getProductsByCatBrowsing(selectedCategory: {name: string, subcetegories: {name: string}[]}){
+    this.paramQuery = this.db.collection(MODELTYPE.PRODUCTS);
+    if(selectedCategory.name != undefined && selectedCategory.subcetegories.length ==0){
+      
+      this.paramQuery = this.updateFilterQuery(this.paramQuery,'category', selectedCategory.name);
+    }
+    if(selectedCategory.subcetegories.length != 0){
+      
+      this.paramQuery = this.updateFilterQuery(this.paramQuery,'subcategory',selectedCategory.subcetegories[0]?.name);
+    }
+    let s = await this.paramQuery.get().then((querySnapshot)=>{
+      let w = querySnapshot.docs.map(function(doc) {
+        return doc;
+      });
+      return w ;
+    })
+    // console.log(s)
+
+    return s;
+
   }
 
   async getCategoryByName(name:string){
@@ -227,4 +252,27 @@ export class ProductService {
     );
     this.productCollection.doc(id).delete();
   }
+  addProductt() {
+    // Add a new document with a generated id.
+    this.firestore
+      .collection(MODELTYPE.PRODUCTS)
+      .add({
+        name: 'Mal Gowa',
+        averageRating: '3',
+        category: 'vegetable',
+        subcategory: 'Ala',
+        noOfRatings: '4',
+        price: 56,
+        productDesc1:"huhu",
+        productDesc2:"ftftdt",
+        productDesc3:"xersrd"
+      })
+      .then(function (docRef) {
+        alert('Document written with ID: ' + docRef.id);
+      })
+      .catch(function (error) {
+        console.error('Error adding document: ', error);
+      });
+  }
+
 }

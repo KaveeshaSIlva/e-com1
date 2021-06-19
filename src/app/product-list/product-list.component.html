@@ -11,13 +11,14 @@
 
         <div class="row justify-content-between address-container">
             <p class="my-0 address text-capitalize" *ngIf="allProductsMode">Home / All Products</p>
-            <p class="my-0 address text-capitalize" *ngIf="getByCategoryMode">Home / Categories / {{ address }}</p>
+            <p class="my-0 address text-capitalize" *ngIf="getByCategoryMode">Home / Categories / {{ selectedCategory.name }}</p>
+            <p class="my-0 address text-capitalize" *ngIf="getBySubCategoryMode">Home / Categories / {{ selectedCategory.name }} / {{ selectedCategory.subcetegories[0]?.name }}</p>
             <p class="my-0 address" *ngIf="searchMode">Search results for "{{ searchValue }}"</p>
             <p class="my-0 sort-section">Sort By:
                 <span (click)="onSortProducts('noOfRatings')" style="cursor: pointer"
                     [ngStyle]="{'font-weight': activeSort === 'noOfRatings' ? 'bold' : 400}">Popularity</span> |
-                <span (click)="onSortProducts('name')" style="cursor: pointer"
-                    [ngStyle]="{'font-weight': activeSort === 'name' ? 'bold' : 400}">Name</span> |
+                <!-- <span (click)="onSortProducts('name')" style="cursor: pointer"
+                    [ngStyle]="{'font-weight': activeSort === 'name' ? 'bold' : 400}">Name</span> | -->
                 <span (click)="onSortProducts('price')" style="cursor: pointer"
                     [ngStyle]="{'font-weight': activeSort === 'price' ? 'bold' : 400}" class="mr-3">Price</span>
                 Order: <span (click)="onSelectOrder('DESC')" style="cursor: pointer"
@@ -30,7 +31,7 @@
         <div class="row">
 
             <div class="col-md-2 p-0 filter-pane">
-                <app-filter-by></app-filter-by>
+                <app-filter-by (selectedcategoryChanged)="selectedcategoryChanged($event)"></app-filter-by>
             </div>
 
             <div class="col-md-12 refine-section">
